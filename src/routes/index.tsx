@@ -97,16 +97,51 @@ function Cinema() {
 
     <section id="presentazione" className="mx-auto max-w-7xl px-5 pb-28 pt-12 md:px-10">
       <div className="mb-5 flex items-end justify-between"><div><p className="font-mono text-[10px] tracking-[.24em] text-primary">DAL PROBLEMA ALLA RESPONSABILITÀ</p><h2 className="mt-2 font-serif text-3xl md:text-4xl">Una guida passo dopo passo</h2></div><span className="font-mono text-sm text-muted-foreground">{String(slide + 1).padStart(2, '0')} <span className="text-primary">/</span> {slides.length}</span></div>
-      <div className="grid gap-5 lg:grid-cols-[1fr_240px]">
-        <article className="relative flex min-h-[370px] flex-col justify-between overflow-hidden border border-border bg-card p-7 md:min-h-[420px] md:p-12" key={slide}>
-          <div className="absolute -right-8 -top-16 font-serif text-[15rem] leading-none text-primary/[.035]">{String(slide + 1).padStart(2, '0')}</div>
-          <div className="relative"><p className="font-mono text-[10px] tracking-[.25em] text-primary">{slides[slide][0]}</p><h3 className="mt-9 max-w-3xl whitespace-pre-line font-serif text-4xl leading-[1.05] md:text-6xl">{slides[slide][1]}</h3></div>
-          <div className="relative mt-8 grid gap-5 border-t border-border pt-6 md:grid-cols-2"><p className="max-w-xl text-sm leading-6 text-muted-foreground">{slides[slide][2]}</p><p className="border-l-2 border-primary pl-4 text-sm leading-6 text-foreground/90">{slides[slide][3]}</p></div>
-          {[10, 11, 12, 15, 16].includes(slide) && <pre className="relative mt-5 max-h-28 overflow-auto border border-border bg-[#101113] p-4 font-mono text-[10px] leading-5 text-primary md:text-xs">{slide < 12 ? 'lock (lucchettoDelPosto)\n{\n    if (cliente != 0)\n        return false; // posto occupato\n\n    cliente = numeroCliente;\n    return true;\n}' : slide === 12 ? 'for (int cliente = 1; cliente <= 50; cliente++)\n{\n    // Avvia la richiesta del cliente\n    avviaRichiesta(cliente);\n}' : slide === 15 ? 'postoAccessibile.AnnunciaStato();\n// Non affidarti soltanto al colore\nmostraEtichetta("Libero");' : 'mostraPrezzoCompleto();\nspiegaSuggerimentoAI();\n// Lo staff può sempre intervenire'}</pre>}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_250px]">
+        <article className="relative overflow-hidden border border-border bg-card p-6 md:p-10" key={slide}>
+          <div className="pointer-events-none absolute -right-5 -top-12 font-serif text-[13rem] leading-none text-primary/[.035]">{String(slide + 1).padStart(2, '0')}</div>
+          <div className="relative border-b border-border pb-6">
+            <p className="font-mono text-[10px] tracking-[.2em] text-primary">{slides[slide].section}</p>
+            <h3 className="mt-5 max-w-4xl font-serif text-3xl leading-tight md:text-5xl">{slides[slide].title}</h3>
+          </div>
+          <div className="relative grid gap-5 py-6 md:grid-cols-2">
+            <p className="text-base font-medium leading-7 text-foreground">{slides[slide].summary}</p>
+            <p className="border-l-2 border-primary pl-4 text-sm leading-6 text-muted-foreground">{slides[slide].explanation}</p>
+          </div>
+          <ul className="relative grid gap-3 border-t border-border pt-6 md:grid-cols-2">
+            {slides[slide].bullets.map((bullet, index) => (
+              <li key={`${slide}-${index}`} className="flex gap-3 rounded-sm bg-background/60 p-4 text-sm leading-6 text-foreground/90">
+                <span className="mt-0.5 shrink-0 font-mono text-[10px] text-primary">{String(index + 1).padStart(2, '0')}</span>
+                <span>{bullet}</span>
+              </li>
+            ))}
+          </ul>
+          {slides[slide].snippet && (
+            <pre className="relative mt-6 overflow-x-auto border border-border bg-[#101113] p-4 font-mono text-xs leading-6 text-primary md:text-sm">{slides[slide].snippet}</pre>
+          )}
+          <div className="relative mt-6 border-l-2 border-primary bg-primary/5 px-5 py-4">
+            <p className="mb-1 font-mono text-[9px] tracking-[.18em] text-primary">DA RICORDARE</p>
+            <p className="text-sm font-medium leading-6 text-foreground">{slides[slide].takeaway}</p>
+          </div>
         </article>
-        <aside className="flex flex-row gap-1 overflow-x-auto border border-border bg-card p-2 lg:flex-col lg:overflow-y-auto">{slides.map((s, i) => <button key={s[0]} onClick={() => setSlide(i)} className={`flex min-w-[42px] items-center gap-3 rounded-sm px-3 py-2 text-left font-mono text-[10px] transition lg:min-w-0 ${slide === i ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}><span>{String(i + 1).padStart(2, '0')}</span><span className="hidden truncate font-sans text-xs sm:inline lg:block">{s[1].replace('\n', ' ')}</span></button>)}</aside>
+        <aside aria-label="Indice delle slide" className="flex max-h-[540px] flex-row gap-1 overflow-x-auto border border-border bg-card p-2 lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden">
+          {slides.map((item, index) => (
+            <button key={item.section} onClick={() => setSlide(index)} aria-current={slide === index ? 'step' : undefined} className={`flex min-w-[48px] items-start gap-3 rounded-sm px-3 py-2.5 text-left transition lg:min-w-0 ${slide === index ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+              <span className="pt-0.5 font-mono text-[10px]">{String(index + 1).padStart(2, '0')}</span>
+              <span className="hidden text-xs leading-5 sm:block">{item.title}</span>
+            </button>
+          ))}
+        </aside>
       </div>
-      <div className="mt-4 flex items-center justify-between"><div className="h-[2px] w-2/3 bg-muted"><div className="h-full bg-primary transition-all duration-500" style={{ width: `${((slide + 1) / slides.length) * 100}%` }}/></div><div className="flex gap-2"><button aria-label="Slide precedente" onClick={() => setSlide(Math.max(0, slide - 1))} className="rounded-sm border border-border p-3 transition hover:border-primary hover:text-primary disabled:opacity-30" disabled={slide === 0}><ArrowLeft className="h-4 w-4"/></button><button aria-label="Slide successiva" onClick={() => setSlide(Math.min(slides.length - 1, slide + 1))} className="rounded-sm border border-border p-3 transition hover:border-primary hover:text-primary disabled:opacity-30" disabled={slide === slides.length - 1}><ArrowRight className="h-4 w-4"/></button></div></div>
+      <div className="mt-5 flex items-center justify-between gap-4">
+        <div aria-label={`Slide ${slide + 1} di ${slides.length}`} className="grid flex-1 grid-cols-15 gap-1">
+          {slides.map((item, index) => <span key={item.section} className={`h-1 rounded-full ${index <= slide ? 'bg-primary' : 'bg-muted'}`} />)}
+        </div>
+        <div className="flex gap-2">
+          <button aria-label="Slide precedente" onClick={() => setSlide(Math.max(0, slide - 1))} className="rounded-sm border border-border p-3 transition hover:border-primary hover:text-primary disabled:opacity-30" disabled={slide === 0}><ArrowLeft className="h-4 w-4"/></button>
+          <button aria-label="Slide successiva" onClick={() => setSlide(Math.min(slides.length - 1, slide + 1))} className="rounded-sm border border-border p-3 transition hover:border-primary hover:text-primary disabled:opacity-30" disabled={slide === slides.length - 1}><ArrowRight className="h-4 w-4"/></button>
+        </div>
+      </div>
     </section>
 
     <section id="simulazione" className="border-t border-border bg-[#131416] px-5 py-20 md:px-10 md:py-28">
