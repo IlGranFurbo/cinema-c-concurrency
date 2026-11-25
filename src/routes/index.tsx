@@ -31,6 +31,8 @@ const slides: PresentationSlide[] = [
   { section: '15 · CONCLUSIONI E FONTI', title: 'Conclusioni: un sistema corretto e responsabile', summary: 'La correttezza si dimostra con invarianti e test; la responsabilità con scelte dichiarate.', explanation: 'Accessibilità, equità e controllo umano completano la progettazione della prenotazione.', bullets: [], takeaway: '' },
 ]
 
+const slideTags = ['MODELLO', 'RACE CONDITION', 'SINCRONIZZAZIONE', 'ATOMICITÀ', 'GRANULARITÀ', 'DEADLOCK', 'ALGORITMO', 'IMPLEMENTAZIONE', 'VERIFICA', 'ACCESSIBILITÀ', 'EQUITÀ', 'IA', 'ETICA', 'GARANZIE', 'RESPONSABILITÀ']
+
 const code = `using System;\nusing System.Threading;\n\npublic sealed class Cinema\n{\n    private const int RowCount = 10;\n    private const int ColumnCount = 10;\n\n    // La matrice contiene l'id del cliente. 0 significa "libero".\n    private readonly int[,] owner = new int[RowCount, ColumnCount];\n\n    // Ogni posto ha il proprio lucchetto.\n    private readonly object[,] seatLocks = new object[RowCount, ColumnCount];\n\n    public Cinema()\n    {\n        for (int row = 0; row < RowCount; row++)\n        {\n            for (int column = 0; column < ColumnCount; column++)\n            {\n                seatLocks[row, column] = new object();\n            }\n        }\n    }\n\n    public bool TryReserveBlock(int clientId, int row, int firstColumn, int amount)\n    {\n        if (!IsValidRequest(row, firstColumn, amount))\n        {\n            return false;\n        }\n\n        // Ricorda quali lock sono stati davvero acquisiti.\n        bool[] acquired = new bool[amount];\n\n        try\n        {\n            // Tutti i clienti chiedono i lock da sinistra verso destra.\n            for (int offset = 0; offset < amount; offset++)\n            {\n                object currentLock = seatLocks[row, firstColumn + offset];\n                Monitor.Enter(currentLock, ref acquired[offset]);\n            }\n\n            // Prima controllo tutti i posti: non scrivo ancora nulla.\n            for (int offset = 0; offset < amount; offset++)\n            {\n                if (owner[row, firstColumn + offset] != 0)\n                {\n                    return false;\n                }\n            }\n\n            // Commit: assegno l'intero blocco senza rilasciare i lock.\n            for (int offset = 0; offset < amount; offset++)\n            {\n                owner[row, firstColumn + offset] = clientId;\n            }\n\n            return true;\n        }\n        finally\n        {\n            // Rilascio in ordine inverso, anche dopo un return false.\n            for (int offset = amount - 1; offset >= 0; offset--)\n            {\n                if (acquired[offset])\n                {\n                    Monitor.Exit(seatLocks[row, firstColumn + offset]);\n                }\n            }\n        }\n    }\n\n    private static bool IsValidRequest(int row, int firstColumn, int amount)\n    {\n        bool rowIsValid = row >= 0 && row < RowCount;\n        bool amountIsValid = amount >= 1 && amount <= 6;\n        bool blockFits = firstColumn >= 0\n            && firstColumn + amount <= ColumnCount;\n\n        return rowIsValid && amountIsValid && blockFits;\n    }\n}\n\n// Un oggetto richiesta evita lambda e rende esplicito cosa esegue il thread.\npublic sealed class ClientRequest\n{\n    private readonly Cinema cinema;\n    private readonly int clientId;\n    private readonly int row;\n    private readonly int column;\n\n    public ClientRequest(Cinema cinema, int clientId, int row, int column)\n    {\n        this.cinema = cinema;\n        this.clientId = clientId;\n        this.row = row;\n        this.column = column;\n    }\n\n    public void Run()\n    {\n        bool success = cinema.TryReserveBlock(clientId, row, column, 1);\n        string result = success ? "PRENOTATO" : "RIFIUTATO";\n        Console.WriteLine("Cliente " + clientId + ": " + result);\n    }\n}\n\npublic static class Program\n{\n    public static void Main()\n    {\n        Cinema cinema = new Cinema();\n        Thread[] clients = new Thread[50];\n\n        for (int index = 0; index < clients.Length; index++)\n        {\n            int clientId = index + 1;\n            // Le richieste si concentrano sugli stessi nove posti centrali.\n            int[] targetRows = { 4, 4, 4, 4, 4, 5, 5, 5, 5 };\n            int[] targetColumns = { 3, 4, 5, 6, 7, 3, 4, 5, 6 };\n            int row;\n            int column;\n            if (clientId <= 9)\n            {\n                int target = clientId - 1;\n                row = targetRows[target];\n                column = targetColumns[target];\n            }\n            else\n            {\n                row = (clientId * 3) % RowCount;\n                column = (clientId * 7) % ColumnCount;\n            }\n            ClientRequest request = new ClientRequest(cinema, clientId, row, column);\n            clients[index] = new Thread(request.Run);\n            clients[index].Start();\n        }\n\n        for (int index = 0; index < clients.Length; index++)\n        {\n            clients[index].Join();\n        }\n    }\n}`
 
 export const Route = createFileRoute('/')({
@@ -115,42 +117,36 @@ function Cinema() {
       <div className="absolute bottom-7 right-8 font-mono text-[10px] tracking-widest text-muted-foreground">SCORRI PER ESPLORARE ↓</div>
     </section>
 
-    <section id="presentazione" className="mx-auto max-w-7xl px-5 pb-28 pt-12 md:px-10">
+    <section id="presentazione" className="mx-auto max-w-[96rem] px-5 pb-28 pt-12 md:px-8 xl:px-12">
       <div className="mb-5 flex items-end justify-between"><div><p className="font-mono text-[10px] tracking-[.24em] text-primary">DAL PROBLEMA ALLA RESPONSABILITÀ</p><h2 className="mt-2 font-serif text-3xl md:text-4xl">Una guida passo dopo passo</h2></div><span className="font-mono text-sm text-muted-foreground">{String(slide + 1).padStart(2, '0')} <span className="text-primary">/</span> {slides.length}</span></div>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_250px]">
-        <article className="relative overflow-hidden border border-border bg-card p-6 md:p-10" key={slide}>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_270px]">
+        <article className="relative overflow-hidden border border-border bg-card p-5 shadow-[0_20px_80px_rgba(0,0,0,.18)] md:p-8 xl:p-10" key={slide}>
           <div className="pointer-events-none absolute -right-5 -top-12 font-serif text-[13rem] leading-none text-primary/[.035]">{String(slide + 1).padStart(2, '0')}</div>
           <div className="relative border-b border-border pb-6">
             <p className="font-mono text-[10px] tracking-[.2em] text-primary">{slides[slide].section}</p>
             <h3 className="mt-5 max-w-4xl font-serif text-3xl leading-tight md:text-5xl">{slides[slide].title}</h3>
           </div>
-          <div className="relative grid gap-5 py-6 md:grid-cols-2">
-            <p className="text-base font-medium leading-7 text-foreground">{slides[slide].summary}</p>
-            <p className="border-l-2 border-primary pl-4 text-sm leading-6 text-muted-foreground">{slides[slide].explanation}</p>
+          <div className="relative mt-6 grid gap-4 sm:grid-cols-3">
+            {[['100', 'POSTI'], ['50', 'THREAD'], ['09', 'POSTI CONTESI']].map(([value, label]) => <div key={label} className="border border-border bg-background/60 px-4 py-3"><p className="font-mono text-2xl text-primary">{value}</p><p className="mt-1 font-mono text-[9px] tracking-[.2em] text-muted-foreground">{label}</p></div>)}
           </div>
-          {slides[slide].bullets.length > 0 && (
-            <ul className="relative grid gap-3 border-t border-border pt-6 md:grid-cols-2">
-              {slides[slide].bullets.map((bullet, index) => (
-                <li key={`${slide}-${index}`} className="flex gap-3 rounded-sm bg-background/60 p-4 text-sm leading-6 text-foreground/90">
-                  <span className="mt-0.5 shrink-0 font-mono text-[10px] text-primary">{String(index + 1).padStart(2, '0')}</span>
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {slides[slide].snippet && (
-            <pre className="relative mt-6 overflow-x-auto border border-border bg-[#101113] p-4 font-mono text-xs leading-6 text-primary md:text-sm">{slides[slide].snippet}</pre>
-          )}
-          <div className="relative mt-6 border-t border-border pt-6">
-            <p className="mb-3 font-mono text-[10px] tracking-[.18em] text-primary">CONTENUTO COMPLETO DELLA SLIDE</p>
-            <p className="whitespace-pre-line text-sm leading-7 text-foreground/90">{fullSlideDetails[slide]}</p>
+          <div className="relative mt-4 h-24 overflow-hidden border border-primary/20 bg-gradient-to-r from-primary/[.16] via-card to-background">
+            <div className="absolute inset-y-0 left-[12%] w-px bg-primary/35"/><div className="absolute inset-y-0 left-[35%] w-px bg-primary/20"/><div className="absolute inset-y-0 left-[58%] w-px bg-primary/20"/><div className="absolute inset-y-0 left-[81%] w-px bg-primary/35"/>
+            <div className="absolute left-[10%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_28px_8px_rgba(230,170,80,.35)]"/><div className="absolute left-[34%] top-1/2 h-px w-[25%] bg-primary/60"/><div className="absolute left-[58%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border border-primary bg-primary/20"/><div className="absolute left-[81%] top-1/2 h-px w-[10%] bg-primary/60"/>
+            <span className="absolute bottom-2 left-3 font-mono text-[9px] tracking-[.2em] text-primary/80">{slideTags[slide]}</span><span className="absolute right-3 top-2 font-mono text-[9px] text-muted-foreground">LOCK / VERIFY / COMMIT</span>
           </div>
-          {slides[slide].takeaway && (
-            <div className="relative mt-6 border-l-2 border-primary bg-primary/5 px-5 py-4">
-              <p className="mb-1 font-mono text-[9px] tracking-[.18em] text-primary">DA RICORDARE</p>
-              <p className="text-sm font-medium leading-6 text-foreground">{slides[slide].takeaway}</p>
+          <div className="relative mt-6 grid gap-8 xl:grid-cols-[minmax(0,.78fr)_minmax(0,1.22fr)]">
+            <div>
+              <p className="text-base font-medium leading-7 text-foreground">{slides[slide].summary}</p>
+              <p className="mt-5 border-l-2 border-primary pl-4 text-sm leading-6 text-muted-foreground">{slides[slide].explanation}</p>
+              {slides[slide].bullets.length > 0 && <ul className="mt-6 grid gap-3">{slides[slide].bullets.map((bullet, index) => <li key={`${slide}-${index}`} className="flex gap-3 rounded-sm bg-background/60 p-4 text-sm leading-6 text-foreground/90"><span className="font-mono text-[10px] text-primary">{String(index + 1).padStart(2, '0')}</span><span>{bullet}</span></li>)}</ul>}
+              {slides[slide].snippet && <pre className="mt-6 overflow-x-auto border border-border bg-[#101113] p-4 font-mono text-xs leading-6 text-primary md:text-sm">{slides[slide].snippet}</pre>}
             </div>
-          )}
+            <div className="min-w-0 border-l border-border pl-5 xl:pl-8">
+              <p className="mb-3 font-mono text-[10px] tracking-[.18em] text-primary">CONTENUTO COMPLETO DELLA SLIDE</p>
+              <div className="max-h-[560px] overflow-y-auto pr-3 [scrollbar-color:var(--primary)_transparent]"><p className="whitespace-pre-line text-[13px] leading-6 text-foreground/90">{fullSlideDetails[slide]}</p></div>
+            </div>
+          </div>
+          {slides[slide].takeaway && <div className="relative mt-6 border-l-2 border-primary bg-primary/5 px-5 py-4"><p className="mb-1 font-mono text-[9px] tracking-[.18em] text-primary">DA RICORDARE</p><p className="text-sm font-medium leading-6 text-foreground">{slides[slide].takeaway}</p></div>}
         </article>
         <aside aria-label="Indice delle slide" className="flex max-h-[540px] flex-row gap-1 overflow-x-auto border border-border bg-card p-2 lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden">
           {slides.map((item, index) => (
