@@ -107,64 +107,27 @@ function Cinema() {
       <a href="#simulazione" className="rounded-full border border-border px-4 py-2 text-xs transition hover:border-primary hover:text-primary">Vai alla demo <ArrowRight className="ml-1 inline h-3 w-3"/></a>
     </header>
 
-    <section id="inizio" className="relative flex min-h-[88vh] items-end overflow-hidden px-6 pb-20 pt-28 md:min-h-screen md:px-16 md:pb-24">
-      <div className="absolute right-[-4rem] top-[15%] h-[28rem] w-[28rem] rounded-full bg-primary/10 blur-[110px]"/>
-      <div className="absolute right-[8%] top-[24%] hidden h-[46vh] w-[34vw] border border-primary/20 md:block">
-        <div className="absolute inset-5 border border-primary/10"/><div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30"/><div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_55px_18px_rgba(230,170,80,.25)]"/>
-        <span className="absolute bottom-4 left-5 font-mono text-[10px] tracking-[.25em] text-muted-foreground">FIG. 01 — SALA A / 100 POSTI</span>
-      </div>
-      <div className="relative max-w-3xl animate-fade-in"><p className="mb-6 font-mono text-xs tracking-[.28em] text-primary">LABORATORIO DI INFORMATICA · C# · {slides.length} SLIDE</p><h1 className="font-serif text-6xl leading-[.96] tracking-tight md:text-8xl">Come si<br/><em className="text-primary">prenota</em><br/>una sala?</h1><p className="mt-8 max-w-lg text-base leading-7 text-muted-foreground md:text-lg">Cinquanta clienti arrivano insieme in una sala da 100 posti. Nell’esempio, nove richieste competono per nove posti centrali e il resto della sala rimane visibile.</p><button onClick={() => document.getElementById('presentazione')?.scrollIntoView({ behavior: 'smooth' })} className="mt-9 inline-flex items-center gap-3 rounded-sm bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:scale-[1.03] active:scale-[.98]">Inizia la presentazione <ArrowRight className="h-4 w-4"/></button></div>
-      <div className="absolute bottom-7 right-8 font-mono text-[10px] tracking-widest text-muted-foreground">SCORRI PER ESPLORARE ↓</div>
+    <section id="inizio" className="relative mx-auto flex max-w-[1600px] items-center overflow-hidden px-3 pb-10 pt-24 md:px-8 md:pb-14">
+      <div className="relative w-full overflow-hidden shadow-2xl"><img src="/presentation/slide-01.png" alt="Cinema concorrente — Prenotazioni atomiche, lock e responsabilità" className="block aspect-video w-full object-cover"/><button onClick={() => document.getElementById('presentazione')?.scrollIntoView({ behavior: 'smooth' })} className="absolute bottom-5 right-5 inline-flex items-center gap-3 rounded-sm bg-[#0b1b37]/90 px-5 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur transition hover:bg-[#0b1b37]">Inizia la presentazione <ArrowRight className="h-4 w-4"/></button></div>
     </section>
 
-    <section id="presentazione" className="mx-auto max-w-[96rem] px-5 pb-28 pt-12 md:px-8 xl:px-12">
-      <div className="mb-5 flex items-end justify-between"><div><p className="font-mono text-[10px] tracking-[.24em] text-primary">DAL PROBLEMA ALLA RESPONSABILITÀ</p><h2 className="mt-2 font-serif text-3xl md:text-4xl">Una guida passo dopo passo</h2></div><span className="font-mono text-sm text-muted-foreground">{String(slide + 1).padStart(2, '0')} <span className="text-primary">/</span> {slides.length}</span></div>
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_270px]">
-        <article className="relative overflow-hidden border border-border bg-card p-5 shadow-[0_20px_80px_rgba(0,0,0,.18)] md:p-8 xl:p-10" key={slide}>
-          <div className="pointer-events-none absolute -right-5 -top-12 font-serif text-[13rem] leading-none text-primary/[.035]">{String(slide + 1).padStart(2, '0')}</div>
-          <div className="relative border-b border-border pb-6">
-            <p className="font-mono text-[10px] tracking-[.2em] text-primary">{slides[slide].section}</p>
-            <h3 className="mt-5 max-w-4xl font-serif text-3xl leading-tight md:text-5xl">{slides[slide].title}</h3>
-          </div>
-          <div className="relative mt-6 grid gap-4 sm:grid-cols-3">
-            {[['100', 'POSTI'], ['50', 'THREAD'], ['09', 'POSTI CONTESI']].map(([value, label]) => <div key={label} className="border border-border bg-background/60 px-4 py-3"><p className="font-mono text-2xl text-primary">{value}</p><p className="mt-1 font-mono text-[9px] tracking-[.2em] text-muted-foreground">{label}</p></div>)}
-          </div>
-          <div className="relative mt-4 h-24 overflow-hidden border border-primary/20 bg-gradient-to-r from-primary/[.16] via-card to-background">
-            <div className="absolute inset-y-0 left-[12%] w-px bg-primary/35"/><div className="absolute inset-y-0 left-[35%] w-px bg-primary/20"/><div className="absolute inset-y-0 left-[58%] w-px bg-primary/20"/><div className="absolute inset-y-0 left-[81%] w-px bg-primary/35"/>
-            <div className="absolute left-[10%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_28px_8px_rgba(230,170,80,.35)]"/><div className="absolute left-[34%] top-1/2 h-px w-[25%] bg-primary/60"/><div className="absolute left-[58%] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border border-primary bg-primary/20"/><div className="absolute left-[81%] top-1/2 h-px w-[10%] bg-primary/60"/>
-            <span className="absolute bottom-2 left-3 font-mono text-[9px] tracking-[.2em] text-primary/80">{slideTags[slide]}</span><span className="absolute right-3 top-2 font-mono text-[9px] text-muted-foreground">LOCK / VERIFY / COMMIT</span>
-          </div>
-          <div className="relative mt-6 grid gap-8 xl:grid-cols-[minmax(0,.78fr)_minmax(0,1.22fr)]">
-            <div>
-              <p className="text-base font-medium leading-7 text-foreground">{slides[slide].summary}</p>
-              <p className="mt-5 border-l-2 border-primary pl-4 text-sm leading-6 text-muted-foreground">{slides[slide].explanation}</p>
-              {slides[slide].bullets.length > 0 && <ul className="mt-6 grid gap-3">{slides[slide].bullets.map((bullet, index) => <li key={`${slide}-${index}`} className="flex gap-3 rounded-sm bg-background/60 p-4 text-sm leading-6 text-foreground/90"><span className="font-mono text-[10px] text-primary">{String(index + 1).padStart(2, '0')}</span><span>{bullet}</span></li>)}</ul>}
-              {slides[slide].snippet && <pre className="mt-6 overflow-x-auto border border-border bg-[#101113] p-4 font-mono text-xs leading-6 text-primary md:text-sm">{slides[slide].snippet}</pre>}
-            </div>
-            <div className="min-w-0 border-l border-border pl-5 xl:pl-8">
-              <p className="mb-3 font-mono text-[10px] tracking-[.18em] text-primary">CONTENUTO COMPLETO DELLA SLIDE</p>
-              <div className="max-h-[560px] overflow-y-auto pr-3 [scrollbar-color:var(--primary)_transparent]"><p className="whitespace-pre-line text-[13px] leading-6 text-foreground/90">{fullSlideDetails[slide]}</p></div>
-            </div>
-          </div>
-          {slides[slide].takeaway && <div className="relative mt-6 border-l-2 border-primary bg-primary/5 px-5 py-4"><p className="mb-1 font-mono text-[9px] tracking-[.18em] text-primary">DA RICORDARE</p><p className="text-sm font-medium leading-6 text-foreground">{slides[slide].takeaway}</p></div>}
-        </article>
-        <aside aria-label="Indice delle slide" className="flex max-h-[540px] flex-row gap-1 overflow-x-auto border border-border bg-card p-2 lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden">
-          {slides.map((item, index) => (
-            <button key={item.section} onClick={() => setSlide(index)} aria-current={slide === index ? 'step' : undefined} className={`flex min-w-[48px] items-start gap-3 rounded-sm px-3 py-2.5 text-left transition lg:min-w-0 ${slide === index ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-              <span className="pt-0.5 font-mono text-[10px]">{String(index + 1).padStart(2, '0')}</span>
-              <span className="hidden text-xs leading-5 sm:block">{item.title}</span>
-            </button>
-          ))}
-        </aside>
+    <section id="presentazione" className="mx-auto max-w-[1600px] px-3 pb-28 pt-4 md:px-8">
+      <div className="relative overflow-hidden bg-[#eef2f5] shadow-2xl" key={slide}>
+        <img src={`/presentation/slide-${String(slide + 2).padStart(2, '0')}.png`} alt={`${slides[slide].section}: ${slides[slide].title}`} className="block aspect-video w-full object-contain" />
+        <p className="sr-only">{fullSlideDetails[slide]}</p>
       </div>
-      <div className="mt-5 flex items-center justify-between gap-4">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+        <aside aria-label="Indice delle slide" className="order-2 flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-sm border border-border bg-card p-2 md:order-1">
+          {slides.map((item, index) => <button key={item.section} onClick={() => setSlide(index)} aria-current={slide === index ? 'step' : undefined} title={item.title} className={`min-w-[38px] rounded-sm px-3 py-2 text-left font-mono text-[10px] transition ${slide === index ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>{String(index + 1).padStart(2, '0')}</button>)}
+        </aside>
+        <div className="order-1 flex items-center gap-2 md:order-2">
         <div aria-label={`Slide ${slide + 1} di ${slides.length}`} className="grid flex-1 grid-cols-15 gap-1">
           {slides.map((item, index) => <span key={item.section} className={`h-1 rounded-full ${index <= slide ? 'bg-primary' : 'bg-muted'}`} />)}
         </div>
         <div className="flex gap-2">
           <button aria-label="Slide precedente" onClick={() => setSlide(Math.max(0, slide - 1))} className="rounded-sm border border-border p-3 transition hover:border-primary hover:text-primary disabled:opacity-30" disabled={slide === 0}><ArrowLeft className="h-4 w-4"/></button>
           <button aria-label="Slide successiva" onClick={() => setSlide(Math.min(slides.length - 1, slide + 1))} className="rounded-sm border border-border p-3 transition hover:border-primary hover:text-primary disabled:opacity-30" disabled={slide === slides.length - 1}><ArrowRight className="h-4 w-4"/></button>
-        </div>
+        </div></div>
       </div>
     </section>
 
