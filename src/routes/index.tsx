@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
+import { fullSlideDetails } from '@/lib/presentation-content'
+import { fullSlideDetails } from '@/lib/presentation-content'
 import { ArrowLeft, ArrowRight, Play, RotateCcw, Film, Ticket, Users, Zap } from 'lucide-react'
 
 type PresentationSlide = {
@@ -26,7 +28,7 @@ const slides: PresentationSlide[] = [
   { section: '11 · ACCESSIBILITÀ', title: 'La mappa deve funzionare per tutte le persone', summary: 'Il colore da solo non comunica abbastanza: ogni posto deve avere un’etichetta, uno stato testuale e un’alternativa alla griglia.', explanation: 'La correttezza tecnica della prenotazione non basta se qualcuno non riesce a leggere, selezionare o confermare il posto.', bullets: ['Percepibile · nomi e stati annunciabili da uno screen reader.', 'Utilizzabile · tastiera, focus visibile e nessun timeout rigido.', 'Comprensibile · prezzi, commissioni, rimborsi ed errori spiegati prima della conferma.', 'Robusto · ruoli semantici, browser diversi e vista alternativa a elenco.', 'Posti riservati e canali equivalenti · online, telefono e sportello devono offrire condizioni reali.'], takeaway: '“Posto non disponibile” non è una soluzione: il messaggio deve anche proporre cosa fare dopo.' },
   { section: '12 · GIUSTIZIA SOCIALE', title: 'Un sistema corretto può comunque essere ingiusto', summary: 'Nessuna doppia vendita e nessun deadlock non garantiscono che tutte le persone abbiano le stesse possibilità di entrare.', explanation: 'Canale di prenotazione, orario di apertura, prezzo, commissioni e regole sui blocchi sono scelte di politica del servizio, non dettagli del lock.', bullets: ['Canali · app, telefono e sportello non devono diventare serie A e serie B.', 'Orari · vendite a mezzanotte penalizzano chi non ha connessione o lavora di notte.', 'Prezzi · commissioni online o prezzi dinamici trasformano un limite tecnico in una barriera economica.', 'Posti · sei posti adiacenti sottratti a coppie e singoli sono una scelta da motivare.', 'Misure · confronta attesa per categoria e qualità dei posti rimasti.'], takeaway: 'Un lock equo applicato a regole inique produce un’ingiustizia perfettamente sincronizzata.' },
   { section: '13 · ETICA DELL’INTELLIGENZA ARTIFICIALE', title: 'L’IA resta fuori dal nucleo critico', summary: 'Un modello non rende atomica una scrittura e non rompe un ciclo di attese. Nel progetto l’IA è un’estensione, non la soluzione alla concorrenza.', explanation: 'Se suggerisce un posto, prevede l’affluenza o assegna una priorità, il modello prende una decisione che riguarda una persona e deve poter essere controllato.', bullets: ['Finalità necessaria · usare una regola semplice quando è sufficiente.', 'Dati minimi · raccogliere solo ciò che serve, per il tempo necessario.', 'Non discriminazione · testare anche chi usa telefono, sportello o non ha storico.', 'Spiegabilità · mostrare il criterio con parole comprensibili.', 'Supervisione e ricorso · lo staff può correggere e la persona può contestare.'], takeaway: 'Prima di automatizzare: serve davvero? Se sbaglia, chi paga? Si può contestare?' },
-  { section: '14 · RISPOSTE AL PROGETTO', title: 'Sei risposte da portare nella relazione', summary: 'Il progetto non consegna soltanto un programma: esplicita le garanzie e i limiti che il programma deve rispettare.', explanation: 'La correttezza tecnica e la responsabilità sociale sono due piani diversi, ma devono essere discussi insieme.', bullets: ['Un posto non si vende due volte: lettura, verifica e scrittura sono nella stessa sezione critica.', 'Il blocco è atomico: tutti i k posti oppure nessuno.', 'Il deadlock si evita con ordine globale; il timeout è solo una rete di sicurezza.', 'Safety e liveness richiedono prove diverse.', 'Il mutex non produce equità: l’ordine di arrivo va progettato e misurato.', 'L’IA può assistere, ma deve essere spiegabile, reversibile e subordinata al controllo umano.'], takeaway: 'Nessuna scrittura senza lock, nessun lock senza ordine, nessuna decisione automatica senza spiegazione e via d’uscita.' },
+  { section: '14 · RISPOSTE AL PROGETTO', title: 'Sei risposte che il sistema deve saper dare', summary: 'Il progetto non consegna soltanto un programma: esplicita le garanzie e i limiti che il programma deve rispettare.', explanation: 'La correttezza tecnica e la responsabilità sociale sono due piani diversi, ma devono essere discussi insieme.', bullets: ['Un posto non si vende due volte: lettura, verifica e scrittura sono nella stessa sezione critica.', 'Il blocco è atomico: tutti i k posti oppure nessuno.', 'Il deadlock si evita con ordine globale; il timeout è solo una rete di sicurezza.', 'Safety e liveness richiedono prove diverse.', 'Il mutex non produce equità: l’ordine di arrivo va progettato e misurato.', 'L’IA può assistere, ma deve essere spiegabile, reversibile e subordinata al controllo umano.'], takeaway: 'Nessuna scrittura senza lock, nessun lock senza ordine, nessuna decisione automatica senza spiegazione e via d’uscita.' },
   { section: '15 · CONCLUSIONI E FONTI', title: 'Un sistema corretto e responsabile', summary: 'La prenotazione è corretta quando ogni posto ha un proprietario, ogni blocco è tutto-o-niente e ogni richiesta termina senza lasciare lock bloccati.', explanation: 'La responsabilità completa il codice: accessibilità, canali, prezzi, quote, posti riservati e controllo umano decidono che cosa significa “servizio giusto”.', bullets: ['Nessuna scrittura senza lock.', 'Nessun lock senza un ordine condiviso.', 'Nessuna decisione automatica senza spiegazione e ricorso.', 'Nessuna regola equa senza verifica dei risultati.', 'Fonti: PDF del laboratorio; documentazione Microsoft C# su lock e Monitor; W3C Accessibility Principles; UNESCO, Recommendation on the Ethics of Artificial Intelligence (2021).'], takeaway: 'La demo rende visibile la race condition; la relazione deve motivare anche le scelte che il codice da solo non può decidere.' },
 ]
 
@@ -47,35 +49,37 @@ function Cinema() {
   const scheduledTasks = useRef<ReturnType<typeof setTimeout>[]>([])
 
   const focusSeatIds = ['4-3', '4-4', '4-5', '5-3', '5-4', '5-5', '3-4', '3-5', '6-4']
-  const simulateCustomerSeat = (customerId: number) => {
-    if (customerId <= 9) return focusSeatIds[customerId - 1]
-    const outsideSeats = Array.from({ length: 100 }, (_, index) => `${Math.floor(index / 10)}-${index % 10}`).filter(id => !focusSeatIds.includes(id))
-    return outsideSeats[(customerId * 37) % outsideSeats.length]
-  }
   const runSimulation = () => {
     if (running) return
-    setSeats([]); setLog([]); setRunning(true)
+    setSeats([]); setLog([]); setRunning(true); setSimulationResult(null)
     const taken = new Set<string>()
+    let booked = 0
+    let rejected = 0
     scheduledTasks.current = []
 
-    // Tutte le 50 richieste competono volutamente per gli stessi nove posti centrali.
+    // Tutte le 50 richieste scelgono uno dei nove posti centrali: i successivi trovano occupato.
     for (let customer = 1; customer <= 50; customer++) {
       const customerNumber = customer
       const timer = setTimeout(() => {
-        const requestedId = simulateCustomerSeat(customerNumber)
+        const requestedId = focusSeatIds[(customerNumber - 1) % focusSeatIds.length]
         const row = Number(requestedId.split('-')[0])
         const column = Number(requestedId.split('-')[1])
         const seatName = `${String.fromCharCode(65 + row)}${column + 1}`
 
         if (!taken.has(requestedId)) {
           taken.add(requestedId)
+          booked += 1
           setSeats(previous => [...previous, requestedId])
           setLog(previous => [`Cliente ${customerNumber}: PRENOTATO ${seatName}`, ...previous].slice(0, 10))
         } else {
+          rejected += 1
           setLog(previous => [`Cliente ${customerNumber}: RIFIUTATO ${seatName} (già occupato)`, ...previous].slice(0, 10))
         }
 
-        if (customerNumber === 50) setRunning(false)
+        if (customerNumber === 50) {
+          setRunning(false)
+          setSimulationResult(`Esito: ${booked} prenotati · ${rejected} rifiutati su 50 richieste`)
+        }
       }, customer * 70 + Math.random() * 30)
       scheduledTasks.current.push(timer)
     }
@@ -83,7 +87,7 @@ function Cinema() {
   const reset = () => {
     scheduledTasks.current.forEach(clearTimeout)
     scheduledTasks.current = []
-    setSeats([]); setLog([]); setRunning(false)
+    setSeats([]); setLog([]); setRunning(false); setSimulationResult(null)
   }
   const toggleSeat = (id: string) => {
     if (!focusSeatIds.includes(id)) return
@@ -131,6 +135,10 @@ function Cinema() {
           {slides[slide].snippet && (
             <pre className="relative mt-6 overflow-x-auto border border-border bg-[#101113] p-4 font-mono text-xs leading-6 text-primary md:text-sm">{slides[slide].snippet}</pre>
           )}
+          <div className="relative mt-6 border-t border-border pt-6">
+            <p className="mb-3 font-mono text-[10px] tracking-[.18em] text-primary">CONTENUTO COMPLETO DELLA SLIDE</p>
+            <p className="whitespace-pre-line text-sm leading-7 text-foreground/90">{fullSlideDetails[slide]}</p>
+          </div>
           <div className="relative mt-6 border-l-2 border-primary bg-primary/5 px-5 py-4">
             <p className="mb-1 font-mono text-[9px] tracking-[.18em] text-primary">DA RICORDARE</p>
             <p className="text-sm font-medium leading-6 text-foreground">{slides[slide].takeaway}</p>
@@ -157,12 +165,13 @@ function Cinema() {
     </section>
 
     <section id="simulazione" className="border-t border-border bg-[#131416] px-5 py-20 md:px-10 md:py-28">
-      <div className="mx-auto max-w-7xl"><div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="font-mono text-[10px] tracking-[.25em] text-primary">LABORATORIO · THREAD SAFETY</p><h2 className="mt-3 font-serif text-4xl md:text-6xl">La sala in esecuzione</h2><p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">La sala ha 100 posti. Nove clienti si contendono nove posti centrali; gli altri 41 provano a prenotare altrove, così la demo mostra una sala più realistica.</p></div><div className="flex gap-3"><button onClick={runSimulation} disabled={running} className="inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60"><Play className="h-4 w-4"/> {running ? 'In corso…' : 'Avvia simulazione'}</button><button onClick={reset} className="inline-flex items-center gap-2 rounded-sm border border-border px-4 py-3 text-sm transition hover:border-primary hover:text-primary"><RotateCcw className="h-4 w-4"/> Reset</button></div></div>
+      <div className="mx-auto max-w-7xl"><div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="font-mono text-[10px] tracking-[.25em] text-primary">LABORATORIO · THREAD SAFETY</p><h2 className="mt-3 font-serif text-4xl md:text-6xl">La sala in esecuzione</h2><p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">La sala ha 100 posti. Tutte le 50 richieste si concentrano sui nove posti centrali evidenziati: al termine, nove risultano prenotati e 41 rifiutati. I posti fuori da quella zona restano liberi.</p></div><div className="flex gap-3"><button onClick={runSimulation} disabled={running} className="inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60"><Play className="h-4 w-4"/> {running ? 'In corso…' : 'Avvia simulazione'}</button><button onClick={reset} className="inline-flex items-center gap-2 rounded-sm border border-border px-4 py-3 text-sm transition hover:border-primary hover:text-primary"><RotateCcw className="h-4 w-4"/> Reset</button></div></div>
         <div className="grid overflow-hidden border border-border lg:grid-cols-[1.08fr_.92fr]">
           <div className="min-w-0 border-b border-border lg:border-b-0 lg:border-r"><div className="flex items-center justify-between border-b border-border bg-card px-5 py-3"><div className="flex gap-2"><span className="h-2 w-2 rounded-full bg-red-400/70"/><span className="h-2 w-2 rounded-full bg-primary/70"/><span className="h-2 w-2 rounded-full bg-emerald-400/70"/></div><span className="font-mono text-[10px] text-muted-foreground">Program.cs</span><span className="font-mono text-[10px] text-primary">C#</span></div><div className="flex border-b border-border bg-card/60"><button onClick={() => setTab('code')} className={`px-5 py-3 text-xs ${tab === 'code' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}>Codice completo</button><button onClick={() => setTab('output')} className={`px-5 py-3 text-xs ${tab === 'output' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}>Output</button></div>{tab === 'code' ? <textarea aria-label="Editor del codice C#" spellCheck={false} value={edited} onChange={e => setEdited(e.target.value)} className="h-[510px] w-full resize-y bg-[#101113] p-5 font-mono text-[11px] leading-[1.75] text-[#d9d5ca] outline-none selection:bg-primary/30 md:text-xs"/> : <div className="h-[510px] overflow-auto bg-[#101113] p-5 font-mono text-xs leading-7"><p className="mb-3 text-emerald-400">$ dotnet run <span className="text-muted-foreground">// simulazione visiva nel browser</span></p>{log.length ? log.map((line, i) => <p key={i} className={line.includes('PRENOTATO') ? 'text-emerald-300' : 'text-muted-foreground'}>{line}</p>) : <p className="text-muted-foreground">In attesa di esecuzione…</p>}</div>}</div>
           <div className="flex min-h-[580px] flex-col bg-[#191a1c]"><div className="flex items-center justify-between border-b border-border px-5 py-3"><span className="flex items-center gap-2 text-xs font-medium"><Users className="h-4 w-4 text-primary"/> Sala A <span className="text-muted-foreground">· 10 × 10</span></span><span className="font-mono text-[10px] text-muted-foreground">{seats.length} / 100 OCCUPATI</span></div><div className="mx-auto mt-8 w-3/5 rounded-t-[50%] border-t-2 border-primary/50 py-2 text-center font-mono text-[9px] tracking-[.5em] text-primary/80">SCHERMO</div><div className="flex flex-1 flex-col justify-center gap-1 px-3 py-5 md:gap-2 md:px-8">{Array.from({ length: 10 }, (_, row) => <div key={row} className="flex items-center justify-center gap-1 md:gap-2"><span className="w-3 font-mono text-[8px] text-muted-foreground md:w-4 md:text-[10px]">{String.fromCharCode(65 + row)}</span>{Array.from({ length: 10 }, (_, column) => { const id = `${row}-${column}`; const occupied = seats.includes(id); const focus = focusSeatIds.includes(id); return <button key={id} onClick={() => toggleSeat(id)} aria-label={`Fila ${String.fromCharCode(65 + row)}, posto ${column + 1}: ${occupied ? 'occupato' : 'libero'}${focus ? ', zona di interesse' : ''}`} title={`${String.fromCharCode(65 + row)}${column + 1}: ${occupied ? 'occupato' : 'libero'}${focus ? ' · zona di interesse' : ''}`} className={`h-5 w-5 rounded-t-lg rounded-b border transition-all md:h-7 md:w-7 ${occupied ? 'border-primary bg-primary text-primary-foreground' : focus ? 'border-primary/70 bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground/50'}`}><Ticket className="mx-auto h-2.5 w-2.5 opacity-70"/></button> })}</div>)}</div><div className="border-t border-border p-4"><div className="mb-2 flex items-center justify-between text-[10px] text-muted-foreground"><span className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary"/> Registro richieste</span><span>{running ? '50 clienti in arrivo' : log.length ? 'Ultime richieste' : 'Pronto'}</span></div><div className="h-[95px] overflow-hidden font-mono text-[10px] leading-5">{log.length ? log.map((line, index) => <p key={index} className={line.includes('PRENOTATO') ? 'text-emerald-300' : 'text-muted-foreground'}>{line}</p>) : <p className="text-muted-foreground">Avvia la simulazione per vedere richieste accettate e rifiutate…</p>}</div></div></div>
         </div>
-        <p className="mt-4 text-xs leading-5 text-muted-foreground">La mappa mostra tutti i 100 posti; i nove sedili centrali sono evidenziati. I primi nove clienti provano quei posti, mentre gli altri scelgono posti diversi nella sala. Il codice C# è consultabile ma non viene eseguito dal browser.</p>
+        <p className="mt-4 text-xs leading-5 text-muted-foreground">La mappa mostra tutti i 100 posti e mette in evidenza la zona centrale contesa. Tutte le 50 richieste puntano a quei nove sedili: 9 vengono prenotati e 41 ricevono un rifiuto; gli altri 91 posti restano liberi. Il codice C# è consultabile ma non viene eseguito dal browser.</p>
+        {simulationResult && <p role="status" className="mt-3 border-l-2 border-primary bg-primary/5 px-4 py-3 font-mono text-sm text-foreground">{simulationResult}</p>}
       </div>
     </section>
     <footer className="flex flex-col justify-between gap-3 border-t border-border px-6 py-7 text-xs text-muted-foreground md:flex-row md:px-10"><span className="font-serif text-base text-foreground">CINEMA<span className="text-primary">.CS</span> — Concorrenza resa visibile.</span><span>Un progetto didattico · C# e programmazione concorrente</span></footer>
