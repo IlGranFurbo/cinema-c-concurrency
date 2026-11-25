@@ -107,13 +107,19 @@ function Cinema() {
       <a href="#simulazione" className="rounded-full border border-border px-4 py-2 text-xs transition hover:border-primary hover:text-primary">Vai alla demo <ArrowRight className="ml-1 inline h-3 w-3"/></a>
     </header>
 
-    <section id="inizio" className="relative mx-auto flex max-w-[1600px] items-center overflow-hidden px-3 pb-10 pt-24 md:px-8 md:pb-14">
-      <div className="relative w-full overflow-hidden shadow-2xl"><img src="/presentation/slide-01.png" alt="Cinema concorrente — Prenotazioni atomiche, lock e responsabilità" className="block aspect-video w-full object-cover"/><button onClick={() => document.getElementById('presentazione')?.scrollIntoView({ behavior: 'smooth' })} className="absolute bottom-5 right-5 inline-flex items-center gap-3 rounded-sm bg-[#0b1b37]/90 px-5 py-3 text-sm font-semibold text-white shadow-lg backdrop-blur transition hover:bg-[#0b1b37]">Inizia la presentazione <ArrowRight className="h-4 w-4"/></button></div>
+    <section id="inizio" className="relative flex min-h-[88vh] items-end overflow-hidden px-6 pb-20 pt-28 md:min-h-screen md:px-16 md:pb-24">
+      <div className="absolute right-[-4rem] top-[15%] h-[28rem] w-[28rem] rounded-full bg-primary/10 blur-[110px]"/>
+      <div className="absolute right-[8%] top-[24%] hidden h-[46vh] w-[34vw] border border-primary/20 md:block">
+        <div className="absolute inset-5 border border-primary/10"/><div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30"/><div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_55px_18px_rgba(230,170,80,.25)]"/>
+        <span className="absolute bottom-4 left-5 font-mono text-[10px] tracking-[.25em] text-muted-foreground">FIG. 01 — SALA A / 100 POSTI</span>
+      </div>
+      <div className="relative max-w-3xl animate-fade-in"><p className="mb-6 font-mono text-xs tracking-[.28em] text-primary">LABORATORIO DI INFORMATICA · C# · {slides.length} SLIDE</p><h1 className="font-serif text-6xl leading-[.96] tracking-tight md:text-8xl">Come si<br/><em className="text-primary">prenota</em><br/>una sala?</h1><p className="mt-8 max-w-lg text-base leading-7 text-muted-foreground md:text-lg">Cinquanta clienti arrivano insieme in una sala da 100 posti. Nell’esempio, nove richieste competono per nove posti centrali e il resto della sala rimane visibile.</p><button onClick={() => document.getElementById('presentazione')?.scrollIntoView({ behavior: 'smooth' })} className="mt-9 inline-flex items-center gap-3 rounded-sm bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:scale-[1.03] active:scale-[.98]">Inizia la presentazione <ArrowRight className="h-4 w-4"/></button></div>
+      <div className="absolute bottom-7 right-8 font-mono text-[10px] tracking-widest text-muted-foreground">SCORRI PER ESPLORARE ↓</div>
     </section>
 
     <section id="presentazione" className="mx-auto max-w-[1600px] px-3 pb-28 pt-4 md:px-8">
-      <div className="relative overflow-hidden bg-[#eef2f5] shadow-2xl" key={slide}>
-        <img src={`/presentation/slide-${String(slide + 2).padStart(2, '0')}.png`} alt={`${slides[slide].section}: ${slides[slide].title}`} className="block aspect-video w-full object-contain" />
+      <div className="relative overflow-hidden bg-[#191a1c] shadow-2xl" key={slide}>
+        <img src={`/presentation/theme/slide-${String(slide + 2).padStart(2, '0')}.png`} alt={`${slides[slide].section}: ${slides[slide].title}`} className="block aspect-video w-full object-contain" />
         <p className="sr-only">{fullSlideDetails[slide]}</p>
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
