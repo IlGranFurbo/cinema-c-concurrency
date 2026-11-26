@@ -11,6 +11,7 @@ import { blinkTaggerPlugin } from './blink-tagger.plugin.mjs';
 // A link the prerender crawler must not follow: its last segment has a file extension
 // other than .html, so it names a file, not a page (Blink hosting draws the same line).
 const FILE_LINK = /\.(?!html?$)[a-z0-9]+$/i;
+const GITHUB_PAGES_BASE = process.env.GITHUB_ACTIONS ? '/cinema-c-concurrency/' : '/';
 
 // Blink: guarantee global CSS survives agent rewrites of src/routes/__root.tsx.
 // TanStack Start only emits a stylesheet for CSS imported by a ROUTE module, and
@@ -201,6 +202,7 @@ function blinkRouteTreeHealth() {
 }
 
 const __blinkUserConfig = defineConfig({
+  base: GITHUB_PAGES_BASE,
   plugins: [
     blinkEnsureRootCss(),
     blinkRouteTreeHealth(),
