@@ -48,15 +48,20 @@ function Cinema() {
   const [log, setLog] = useState<string[]>([])
   const [simulationResult, setSimulationResult] = useState<string | null>(null)
   const [focusSeatIds, setFocusSeatIds] = useState<string[]>([])
+  const [selectionMode, setSelectionMode] = useState(false)
   const [tab, setTab] = useState<'code' | 'output'>('code')
   const [edited, setEdited] = useState(code)
   const scheduledTasks = useRef<ReturnType<typeof setTimeout>[]>([])
 
   const runSimulation = () => {
     if (running || focusSeatIds.length === 0) {
-      if (focusSeatIds.length === 0) setSimulationResult('Seleziona almeno un posto prima di avviare la simulazione')
+      if (focusSeatIds.length === 0) {
+        setSelectionMode(true)
+        setSimulationResult('Modalità selezione attiva: clicca sui posti nella mappa')
+      }
       return
     }
+    setSelectionMode(false)
     setSeats([]); setLog([]); setRunning(true); setSimulationResult(null)
     const selectedSeats = [...focusSeatIds]
     const taken = new Set<string>()
@@ -65,9 +70,9 @@ function Cinema() {
     let completed = 0
     scheduledTasks.current = []
 
-    // Tutte le 50 richieste scelgono uno dei nove posti selezionati dall'utente: i successivi trovano occupato.
+    // Tutte le 50 richieste scelgono uno dei posti selezionati dall'utente: i successivi trovano occupato.
     // La sequenza conserva l'interleaving visibile, ma l'esito è sempre quello del contratto:
-    // nove posti distinti assegnati una sola volta e 41 richieste rifiutate.
+    // Ogni posto distinto viene assegnato una sola volta; le richieste eccedenti vengono rifiutate.
     for (let customer = 1; customer <= 50; customer++) {
       const customerNumber = customer
       const timer = setTimeout(() => {
@@ -98,11 +103,11 @@ function Cinema() {
   const reset = () => {
     scheduledTasks.current.forEach(clearTimeout)
     scheduledTasks.current = []
-    setSeats([]); setLog([]); setRunning(false); setSimulationResult(null); setFocusSeatIds([])
+    setSeats([]); setLog([]); setRunning(false); setSimulationResult(null); setFocusSeatIds([]); setSelectionMode(false)
   }
   const toggleSeat = (id: string) => {
     if (running || seats.length > 0) return
-    setFocusSeatIds(previous => previous.includes(id) ? previous.filter(seat => seat !== id) : previous.length < 9 ? [...previous, id] : previous)
+    setFocusSeatIds(previous => previous.includes(id) ? previous.filter(seat => seat !== id) : previous.length < 100 ? [...previous, id] : previous)
   }
 
   return <main className="min-h-dvh bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
@@ -143,7 +148,7 @@ function Cinema() {
     </section>
 
     <section id="simulazione" className="border-t border-border bg-[#131416] px-5 py-20 md:px-10 md:py-28">
-      <div className="mx-auto max-w-7xl"><div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="font-mono text-[10px] tracking-[.25em] text-primary">LABORATORIO · THREAD SAFETY</p><h2 className="mt-3 font-serif text-4xl md:text-6xl">La sala in esecuzione</h2><p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">Clicca i posti che vuoi mettere in contesa: puoi sceglierne da 1 a 100. Le 50 richieste si distribuiranno tra i posti selezionati; durante la simulazione non sarà possibile modificare la scelta.</p></div><div className="flex gap-3"><button onClick={runSimulation} disabled={running} className="inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60"><Play className="h-4 w-4"/> {running ? 'In corso…' : focusSeatIds.length ? `Avvia con ${focusSeatIds.length} posti` : 'Seleziona i posti'}</button><button onClick={reset} className="inline-flex items-center gap-2 rounded-sm border border-border px-4 py-3 text-sm transition hover:border-primary hover:text-primary"><RotateCcw className="h-4 w-4"/> Reset</button></div></div>
+      <div className="mx-auto max-w-7xl"><div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="font-mono text-[10px] tracking-[.25em] text-primary">LABORATORIO · THREAD SAFETY</p><h2 className="mt-3 font-serif text-4xl md:text-6xl">La sala in esecuzione</h2><p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">Clicca i posti che vuoi mettere in contesa: puoi sceglierne da 1 a 100. Le 50 richieste si distribuiranno tra i posti selezionati; durante la simulazione non sarà possibile modificare la scelta.</p></div><div className="flex gap-3"><button onClick={runSimulation} disabled={running} aria-pressed={selectionMode} className={`inline-flex items-center gap-2 rounded-sm px-5 py-3 text-sm font-semibold transition disabled:cursor-wait disabled:opacity-60 ${selectionMode ? 'bg-primary text-primary-foreground ring-2 ring-primary/50 ring-offset-2 ring-offset-[#131416]' : 'bg-primary text-primary-foreground hover:scale-[1.02]'}`}><Play className="h-4 w-4"/> {running ? 'In corso…' : selectionMode && !focusSeatIds.length ? 'Selezione attiva' : focusSeatIds.length ? `Avvia con ${focusSeatIds.length} posti` : 'Seleziona i posti'}</button><button onClick={reset} className="inline-flex items-center gap-2 rounded-sm border border-border px-4 py-3 text-sm transition hover:border-primary hover:text-primary"><RotateCcw className="h-4 w-4"/> Reset</button></div></div>
         <div className="grid overflow-hidden border border-border lg:grid-cols-[1.08fr_.92fr]">
           <div className="min-w-0 border-b border-border lg:border-b-0 lg:border-r"><div className="flex items-center justify-between border-b border-border bg-card px-5 py-3"><div className="flex gap-2"><span className="h-2 w-2 rounded-full bg-red-400/70"/><span className="h-2 w-2 rounded-full bg-primary/70"/><span className="h-2 w-2 rounded-full bg-emerald-400/70"/></div><span className="font-mono text-[10px] text-muted-foreground">Program.cs</span><span className="font-mono text-[10px] text-primary">C#</span></div><div className="flex border-b border-border bg-card/60"><button onClick={() => setTab('code')} className={`px-5 py-3 text-xs ${tab === 'code' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}>Codice completo</button><button onClick={() => setTab('output')} className={`px-5 py-3 text-xs ${tab === 'output' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}>Output</button></div>{tab === 'code' ? <textarea aria-label="Editor del codice C#" spellCheck={false} value={edited} onChange={e => setEdited(e.target.value)} className="h-[510px] w-full resize-y bg-[#101113] p-5 font-mono text-[11px] leading-[1.75] text-[#d9d5ca] outline-none selection:bg-primary/30 md:text-xs"/> : <div className="h-[510px] overflow-auto bg-[#101113] p-5 font-mono text-xs leading-7"><p className="mb-3 text-emerald-400">$ dotnet run <span className="text-muted-foreground">// simulazione visiva nel browser</span></p>{log.length ? log.map((line, i) => <p key={i} className={line.includes('PRENOTATO') ? 'text-emerald-300' : 'text-muted-foreground'}>{line}</p>) : <p className="text-muted-foreground">In attesa di esecuzione…</p>}</div>}</div>
           <div className="flex min-h-[580px] flex-col bg-[#191a1c]"><div className="flex items-center justify-between border-b border-border px-5 py-3"><span className="flex items-center gap-2 text-xs font-medium"><Users className="h-4 w-4 text-primary"/> Sala A <span className="text-muted-foreground">· 10 × 10</span></span><span className="font-mono text-[10px] text-muted-foreground">{focusSeatIds.length} SCELTI · {seats.length} / 100 OCCUPATI</span></div><div className="mx-auto mt-8 w-3/5 rounded-t-[50%] border-t-2 border-primary/50 py-2 text-center font-mono text-[9px] tracking-[.5em] text-primary/80">SCHERMO</div><div className="flex flex-1 flex-col justify-center gap-1 px-3 py-5 md:gap-2 md:px-8">{Array.from({ length: 10 }, (_, row) => <div key={row} className="flex items-center justify-center gap-1 md:gap-2"><span className="w-3 font-mono text-[8px] text-muted-foreground md:w-4 md:text-[10px]">{String.fromCharCode(65 + row)}</span>{Array.from({ length: 10 }, (_, column) => { const id = `${row}-${column}`; const occupied = seats.includes(id); const focus = focusSeatIds.includes(id); return <button key={id} onClick={() => toggleSeat(id)} aria-label={`Fila ${String.fromCharCode(65 + row)}, posto ${column + 1}: ${occupied ? 'occupato' : focus ? 'selezionato' : 'libero'}`} title={`${String.fromCharCode(65 + row)}${column + 1}: ${occupied ? 'occupato' : focus ? 'selezionato per la contesa' : 'libero'}`} className={`h-5 w-5 rounded-t-lg rounded-b border transition-all md:h-7 md:w-7 ${occupied ? 'border-primary bg-primary text-primary-foreground' : focus ? 'border-primary/70 bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground/50'}`}><Ticket className="mx-auto h-2.5 w-2.5 opacity-70"/></button> })}</div>)}</div><div className="border-t border-border p-4"><div className="mb-2 flex items-center justify-between text-[10px] text-muted-foreground"><span className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary"/> Registro richieste</span><span>{running ? '50 clienti in arrivo' : log.length ? 'Ultime richieste' : 'Pronto'}</span></div><div className="h-[95px] overflow-hidden font-mono text-[10px] leading-5">{log.length ? log.map((line, index) => <p key={index} className={line.includes('PRENOTATO') ? 'text-emerald-300' : 'text-muted-foreground'}>{line}</p>) : <p className="text-muted-foreground">Seleziona i posti nella mappa, poi avvia la simulazione…</p>}</div></div></div>
